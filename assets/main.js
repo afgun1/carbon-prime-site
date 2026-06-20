@@ -244,15 +244,16 @@ function initReveal(){
 }
 
 /* toast confirmation */
-function toast(msg){
+function toast(msg, showBasket){
   let t = document.querySelector(".toast");
   if(!t){ t = document.createElement("div"); t.className="toast"; document.body.appendChild(t); }
-  t.innerHTML = `<span class="dot"></span><span>${msg}</span><button type="button" class="toast-link" style="background:none;border:none;color:var(--chrome);cursor:pointer;text-decoration:underline;font-size:14px;padding:0 5px;font-family:inherit">View basket</button><button type="button" class="toast-close" style="background:none;border:none;color:inherit;cursor:pointer;font-size:18px;padding:0 10px;margin-left:10px">×</button>`;
+  const basketBtn = showBasket ? `<button type="button" class="toast-link" style="background:none;border:none;color:var(--chrome);cursor:pointer;text-decoration:underline;font-size:14px;padding:0 5px;font-family:inherit">View basket</button>` : '';
+  t.innerHTML = `<span class="dot"></span><span>${msg}</span>${basketBtn}<button type="button" class="toast-close" style="background:none;border:none;color:inherit;cursor:pointer;font-size:18px;padding:0 10px;margin-left:10px">×</button>`;
   requestAnimationFrame(()=>t.classList.add("show"));
   
-  // View basket - direct navigation
+  // View basket - direct navigation (only if button exists)
   const linkBtn = t.querySelector(".toast-link");
-  linkBtn.onclick = function(){ window.location.pathname = "/cart.html"; };
+  if(linkBtn) linkBtn.onclick = function(){ window.location.pathname = "/cart.html"; };
   
   // Close button
   t.querySelector(".toast-close").onclick = (e)=>{ t.classList.remove("show"); };
@@ -416,7 +417,7 @@ function initProduct(){
     addToCart({ id:p.id, name:p.name, pn:p.cat+" · "+p.chassis, ghost:p.ghost,
       price:priceNow(), fit:document.getElementById("fitSel").value,
       coating:COATINGS.find(c=>c.id===coating).label, qty, cardImg:p.cardImg });
-    toast(`${p.name} added`);
+    toast(`${p.name} added`, true);
   };
 
   // gallery image switching on product detail
