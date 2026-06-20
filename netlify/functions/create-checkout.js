@@ -1,4 +1,8 @@
 exports.handler = async (event) => {
+  // Debug: log what we have
+  console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
+  console.log('All env keys:', Object.keys(process.env).filter(k => k.includes('STRIPE')));
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
@@ -12,6 +16,10 @@ exports.handler = async (event) => {
 
     if (!email) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Email is required' }) };
+    }
+
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return { statusCode: 500, body: JSON.stringify({ error: 'Stripe API key not configured in Netlify' }) };
     }
 
     // Build line items for Stripe
