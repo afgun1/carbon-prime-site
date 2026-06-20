@@ -396,7 +396,7 @@ function initProduct(){
   document.getElementById("addBtn").onclick = ()=>{
     addToCart({ id:p.id, name:p.name, pn:p.cat+" · "+p.chassis, ghost:p.ghost,
       price:priceNow(), fit:document.getElementById("fitSel").value,
-      coating:COATINGS.find(c=>c.id===coating).label, qty });
+      coating:COATINGS.find(c=>c.id===coating).label, qty, cardImg:p.cardImg });
     toast(`${p.name} added`);
   };
 
@@ -435,7 +435,7 @@ function initCart(){
   }
   const items = cart.map(i=>`
     <div class="cart-item" data-key="${i.key}">
-      <div class="cart-thumb weave"></div>
+      <div class="cart-thumb weave" ${i.cardImg ? `style="background-image:url('${i.cardImg}');background-size:cover;background-position:center"` : ''}></div>
       <div>
         <h3>${i.name}</h3>
         <div class="meta">${i.pn}<br>Fitment: ${i.fit}<br>Coating: ${i.coating}</div>
@@ -491,14 +491,6 @@ function initAccount(){
 
 // CHECKOUT: guest (name+email) or sign-in -> delivery -> payment slot
 function initCheckout(){
-  // Check if payment was successful
-  const params = new URLSearchParams(location.search);
-  if(params.get('success') === 'true'){
-    document.getElementById("coForm").style.display = "none";
-    document.getElementById("coSuccess").style.display = "block";
-    localStorage.removeItem('cp_cart'); // Clear cart
-    return;
-  }
   const cart = getCart();
   const form = document.getElementById("coForm");
   const empty = document.getElementById("coEmpty");
