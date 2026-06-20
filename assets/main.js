@@ -56,7 +56,7 @@ RANGES.forEach(r => PARTS.forEach(pt => {
     fits: [r.chassis], blurb: pt.blurb, specs: pt.specs,
     cardImg: pt.cardImg, allImgs: pt.allImgs
   };
-  if(r.status===\"coming" && r.teaserImgs) p.cardImg = r.teaserImgs[pt.key];
+  if(r.status==="coming" && r.teaserImgs) p.cardImg = r.teaserImgs[pt.key];
   PRODUCTS.push(p);
 }));
 
