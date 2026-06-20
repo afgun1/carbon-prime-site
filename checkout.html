@@ -9,6 +9,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/styles.css">
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  // Load Stripe public key from function
+  fetch('/.netlify/functions/get-stripe-key')
+    .then(r => r.json())
+    .then(d => { window.STRIPE_PUBLIC_KEY = d.publicKey; })
+    .catch(e => console.error('Failed to load Stripe key', e));
+</script>
 </head>
 <body data-page="checkout">
 <div id="site-header"></div>
@@ -60,15 +68,12 @@
         <button class="btn btn-primary btn-block" id="toPayment" type="button">Continue to payment</button>
 
         <!-- 03 Payment (revealed after Continue) -->
-        <div class="co-section" id="paymentSection" style="margin-top:20px">
+        <div class="co-section" id="paymentSection" style="margin-top:20px;display:none">
           <h2><span class="step-n">03</span> Payment</h2>
           <p class="sub">Pay securely by card.</p>
-          <div class="pay-placeholder">
-            Card payment appears here.
-            <span class="lock">Encrypted · handled by Stripe · your card never touches this site</span>
-          </div>
+          <div id="payment-element"></div>
           <button class="btn btn-primary btn-block" id="payBtn" type="button" style="margin-top:18px">Pay <span id="payTotal"></span></button>
-          <p class="pay-note">Payments aren't switched on yet - this box is the slot where Stripe Checkout plugs in.</p>
+          <p class="pay-note" id="payMessage"></p>
         </div>
 
       </div>

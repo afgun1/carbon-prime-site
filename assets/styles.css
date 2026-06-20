@@ -360,11 +360,7 @@
   .shop-sec-sub.ok,.shop-sec-sub.soon{color:var(--chrome-2)}
   .shop-sec-sub.sold{color:var(--red)}
   .status-badge{position:absolute;z-index:3;top:14px;left:14px;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;padding:5px 9px;border-radius:3px;background:rgba(7,7,8,.66);border:1px solid var(--line-2)}
-  .status-badge.sold {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  }{color:#cfd2d7}
+  .status-badge.sold{color:#cfd2d7}
   .status-badge.soon{color:var(--chrome-2)}
   .card.soldout,.card.coming{cursor:default}
   .card.soldout .card-img,.card.coming .card-img{filter:grayscale(.7) brightness(.62)}
