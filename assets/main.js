@@ -636,8 +636,8 @@ function initCheckout(){
     }
     
     // Validate Delivery section
-    const address1 = document.querySelector('[placeholder="House number and street"]').value.trim();
-    const city = document.querySelector('[placeholder*="Town"]').value.trim();
+    const address1 = document.getElementById("addressField").value.trim();
+    const city = document.getElementById("cityField").value.trim();
     const country = document.getElementById("countryField").value.trim();
     const postcode = document.getElementById("postcodeField").value.trim();
     
