@@ -247,11 +247,15 @@ function initReveal(){
 function toast(msg){
   let t = document.querySelector(".toast");
   if(!t){ t = document.createElement("div"); t.className="toast"; document.body.appendChild(t); }
-  t.innerHTML = `<span class="dot"></span><span>${msg}</span><a href="cart.html" style="color:var(--chrome);cursor:pointer;text-decoration:underline;font-size:14px;padding:0 5px">View basket</a><button type="button" class="toast-close" style="background:none;border:none;color:inherit;cursor:pointer;font-size:18px;padding:0 10px;margin-left:10px">×</button>`;
+  t.innerHTML = `<span class="dot"></span><span>${msg}</span><button type="button" class="toast-link" style="background:none;border:none;color:var(--chrome);cursor:pointer;text-decoration:underline;font-size:14px;padding:0 5px;font-family:inherit">View basket</button><button type="button" class="toast-close" style="background:none;border:none;color:inherit;cursor:pointer;font-size:18px;padding:0 10px;margin-left:10px">×</button>`;
   requestAnimationFrame(()=>t.classList.add("show"));
   
+  // View basket - direct navigation
+  const linkBtn = t.querySelector(".toast-link");
+  linkBtn.onclick = function(){ window.location.pathname = "/cart.html"; };
+  
   // Close button
-  t.querySelector(".toast-close").onclick = (e)=>{ e.stopPropagation(); t.classList.remove("show"); };
+  t.querySelector(".toast-close").onclick = (e)=>{ t.classList.remove("show"); };
   
   // Auto-hide after 5 seconds
   clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), 5000);
