@@ -546,7 +546,11 @@ function initCheckout(){
       body: JSON.stringify({ items: cart, email }),
     });
     
-    if(!res.ok){ toast("Error creating checkout - please try again"); return; }
+    if(!res.ok){ 
+      const errorData = await res.json();
+      toast(`Payment error: ${errorData.error || 'Unknown error'}`);
+      return; 
+    }
     
     const { sessionId } = await res.json();
     
