@@ -530,20 +530,27 @@ function initCheckout(){
   }
   // order summary
   const rows = cart.map(i=>`<div class="sum-row"><span>${i.name} ×${i.qty}<br><small style="color:var(--faint);font-size:11px">${i.fit} · ${i.coating}</small></span><span style="white-space:nowrap">${money(i.price*i.qty)}</span></div>`).join("");
-  document.getElementById("coSummary").innerHTML =
-    `<h3>Order summary</h3>${rows}<div class="sum-row"><span>Shipping</span><span>Calculated next</span></div><div class="sum-row total"><span>Total</span><span>${money(cartTotal())}</span></div>`;
+  
+  function renderSummary(){
+    const country = document.getElementById("countryField") ? document.getElementById("countryField").value.trim() : "United Kingdom";
+    const subtotal = cartTotal();
+    const shipping = country === "United Kingdom" ? 0 : 15;
+    const total = subtotal + shipping;
+    const shippingText = shipping === 0 ? "Free" : money(shipping);
+    
+    document.getElementById("coSummary").innerHTML =
+      `<h3>Order summary</h3>${rows}<div class="sum-row"><span>Subtotal</span><span>${money(subtotal)}</span></div><div class="sum-row"><span>Shipping ${country !== "United Kingdom" ? "(International)" : "(UK)"}</span><span>${shippingText}</span></div><div class="sum-row total"><span>Total</span><span>${money(total)}</span></div>`;
+  }
+  
+  renderSummary();
+  
+  // Update summary when country changes
+  setTimeout(()=>{
+    const cf = document.getElementById("countryField");
+    if(cf) cf.addEventListener("input", renderSummary);
+  }, 100);
+  
   const pt = document.getElementById("payTotal"); if(pt) pt.textContent = money(cartTotal());
-
-  // guest / sign-in toggle
-  document.querySelectorAll("#coTabs .auth-tab").forEach(t=>t.addEventListener("click",()=>{
-    document.querySelectorAll("#coTabs .auth-tab").forEach(x=>x.classList.remove("active"));
-    t.classList.add("active");
-    const guest = t.dataset.co==="guest";
-    document.getElementById("guestPane").style.display = guest?"block":"none";
-    document.getElementById("accountPane").style.display = guest?"none":"block";
-  }));
-  const sc = document.getElementById("coSignin");
-  if(sc) sc.onclick = ()=> toast("Accounts aren't live yet - use guest checkout for now");
 
   // COUPON CODE HANDLING
   let appliedCoupon = null;
@@ -604,11 +611,64 @@ function initCheckout(){
 
   // continue to payment (validates guest name+email)
   document.getElementById("toPayment").onclick = async ()=>{
-    const guestActive = document.querySelector("#coTabs .auth-tab.active").dataset.co==="guest";
-    if(guestActive){
-      const n=document.getElementById("gName").value.trim();
-      const e=document.getElementById("gEmail").value.trim();
-      if(!n || !e){ toast("Add your name and email to continue"); return; }
+    // Validate Contact section
+    const n=document.getElementById("gName").value.trim();
+    const e=document.getElementById("gEmail").value.trim();
+    
+    if(!n){
+      toast("Please enter your name");
+      document.getElementById("gName").focus();
+      return;
+    }
+    
+    if(!e){
+      toast("Please enter your email");
+      document.getElementById("gEmail").focus();
+      return;
+    }
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!emailRegex.test(e)){
+      toast("Please enter a valid email");
+      document.getElementById("gEmail").focus();
+      return;
+    }
+    
+    // Validate Delivery section
+    const address1 = document.querySelector('[placeholder="House number and street"]').value.trim();
+    const city = document.querySelector('[placeholder*="Town"]').value.trim();
+    const country = document.getElementById("countryField").value.trim();
+    const postcode = document.getElementById("postcodeField").value.trim();
+    
+    if(!address1){
+      toast("Please enter your address");
+      return;
+    }
+    
+    if(!city){
+      toast("Please enter your town/city");
+      return;
+    }
+    
+    if(!postcode){
+      toast(`Please enter your ${country === "United Kingdom" ? "postcode" : "postcode/zip code"}`);
+      return;
+    }
+    
+    // Postcode validation - only for UK
+    if(country === "United Kingdom"){
+      const postcodeRegex = /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i;
+      if(!postcodeRegex.test(postcode)){
+        toast("Please enter a valid UK postcode (e.g., SW1A 1AA)");
+        return;
+      }
+    } else {
+      // For non-UK, just check it's not empty (already validated above)
+      if(postcode.length < 3){
+        toast("Please enter a valid postcode/zip code");
+        return;
+      }
     }
     
     // Get cart from localStorage
@@ -626,18 +686,23 @@ function initCheckout(){
     if(!email){ toast("Email is required"); return; }
     
     // Calculate total with coupon
-    let total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    let discount = 0;
     if(appliedCoupon && validCoupons[appliedCoupon]){
-      const discountAmount = total * validCoupons[appliedCoupon];
-      total = total - discountAmount;
+      discount = subtotal * validCoupons[appliedCoupon];
     }
+    
+    // Calculate shipping - free UK, £15 international
+    const shipping = country === "United Kingdom" ? 0 : 15;
+    
+    let total = subtotal - discount + shipping;
     document.getElementById("payTotal").textContent = `£${total.toFixed(2)}`;
     
     // Create payment intent on server
     const res = await fetch('/.netlify/functions/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: cart, email, amount: Math.round(total * 100), coupon: appliedCoupon }),
+      body: JSON.stringify({ items: cart, email, amount: Math.round(total * 100), coupon: appliedCoupon, shipping }),
     });
     
     if(!res.ok){ 
