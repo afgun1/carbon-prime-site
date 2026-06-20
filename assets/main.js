@@ -491,6 +491,14 @@ function initAccount(){
 
 // CHECKOUT: guest (name+email) or sign-in -> delivery -> payment slot
 function initCheckout(){
+  // Check if payment was successful
+  const params = new URLSearchParams(location.search);
+  if(params.get('success') === 'true'){
+    document.getElementById("coForm").style.display = "none";
+    document.getElementById("coSuccess").style.display = "block";
+    localStorage.removeItem('cp_cart'); // Clear cart
+    return;
+  }
   const cart = getCart();
   const form = document.getElementById("coForm");
   const empty = document.getElementById("coEmpty");
