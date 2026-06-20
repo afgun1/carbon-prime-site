@@ -573,7 +573,7 @@ function initCheckout(){
       await stripe.redirectToCheckout({ sessionId });
     };
   };
-  
+}
 
 // INFO / POLICY page: render the policy named in ?p=
 function initInfo(){
