@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Checkout - Carbon Prime</title>
+<meta name="description" content="Carbon Prime checkout." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="checkout">
+<div id="site-header"></div>
+<main class="page">
+  <div class="pagehead"><div class="wrap">
+    <div class="crumbs"><a href="index.html">Home</a><span class="sep">/</span><a href="cart.html">Basket</a><span class="sep">/</span><span>Checkout</span></div>
+    <h1>Checkout</h1>
+  </div></div>
+
+  <div class="wrap">
+    <div class="checkout-wrap" id="coForm">
+      <div class="co-left">
+
+        <!-- 01 Contact: guest or sign in -->
+        <div class="co-section">
+          <h2><span class="step-n">01</span> Contact</h2>
+          <p class="sub">No account needed - check out as a guest. Already registered? <a href="account.html" style="color:var(--chrome-2)">Sign in</a>.</p>
+          <div class="auth-tabs" id="coTabs" style="margin-bottom:22px">
+            <button class="auth-tab active" data-co="guest" type="button">Guest checkout</button>
+            <button class="auth-tab" data-co="account" type="button">Sign in</button>
+          </div>
+          <div id="guestPane">
+            <div class="field-row">
+              <div class="field"><label>Name</label><input id="gName" type="text" placeholder="Your name"></div>
+              <div class="field"><label>Email</label><input id="gEmail" type="email" placeholder="you@email.com"></div>
+            </div>
+            <p style="color:var(--faint);font-size:12px">We'll email your order confirmation and tracking here.</p>
+          </div>
+          <div id="accountPane" style="display:none">
+            <div class="field"><label>Email</label><input type="email" placeholder="you@email.com"></div>
+            <div class="field"><label>Password</label><input type="password" placeholder="Your password"></div>
+            <button class="btn btn-line" type="button" id="coSignin">Sign in</button>
+          </div>
+        </div>
+
+        <!-- 02 Delivery -->
+        <div class="co-section">
+          <h2><span class="step-n">02</span> Delivery</h2>
+          <p class="sub">Where should we send it?</p>
+          <div class="field"><label>Address line 1</label><input type="text" placeholder="House number and street"></div>
+          <div class="field"><label>Address line 2 (optional)</label><input type="text" placeholder="Flat, unit, etc."></div>
+          <div class="field-row">
+            <div class="field"><label>Town / City</label><input type="text"></div>
+            <div class="field"><label>Postcode</label><input type="text"></div>
+          </div>
+          <div class="field"><label>Country</label><input type="text" value="United Kingdom"></div>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="toPayment" type="button">Continue to payment</button>
+
+        <!-- 03 Payment (revealed after Continue) -->
+        <div class="co-section" id="paymentSection" style="margin-top:20px">
+          <h2><span class="step-n">03</span> Payment</h2>
+          <p class="sub">Pay securely by card.</p>
+          <div class="pay-placeholder">
+            Card payment appears here.
+            <span class="lock">Encrypted · handled by Stripe · your card never touches this site</span>
+          </div>
+          <button class="btn btn-primary btn-block" id="payBtn" type="button" style="margin-top:18px">Pay <span id="payTotal"></span></button>
+          <p class="pay-note">Payments aren't switched on yet - this box is the slot where Stripe Checkout plugs in.</p>
+        </div>
+
+      </div>
+
+      <aside class="summary" id="coSummary"></aside>
+    </div>
+
+    <div id="coEmpty" style="display:none"></div>
+  </div>
+</main>
+<div id="site-footer"></div>
+<script src="assets/main.js"></script>
+</body>
+</html>
