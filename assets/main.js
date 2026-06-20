@@ -558,39 +558,81 @@ function initCheckout(){
     const email = document.getElementById("gEmail").value.trim();
     if(!email){ toast("Email is required"); return; }
     
+    // Calculate total
+    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    document.getElementById("payTotal").textContent = `£${total.toFixed(2)}`;
+    
+    // Create payment intent on server
+    const res = await fetch('/.netlify/functions/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: cart, email, amount: Math.round(total * 100) }),
+    });
+    
+    if(!res.ok){ 
+      const errorData = await res.json();
+      toast(`Error: ${errorData.error || 'Failed to process'}`);
+      return; 
+    }
+    
+    const { clientSecret } = await res.json();
+    
     // Show payment section
     const paymentSec = document.getElementById("paymentSection");
     paymentSec.style.display = "block";
     paymentSec.scrollIntoView({behavior:"smooth", block:"center"});
     
-    // Update payment total
-    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    document.getElementById("payTotal").textContent = `£${total.toFixed(2)}`;
-    
-    // Create checkout session
-    const res = await fetch('/.netlify/functions/create-checkout', {
-      method: 'POST',
-      body: JSON.stringify({ items: cart, email }),
-    });
-    
-    if(!res.ok){ 
-      const errorData = await res.json();
-      toast(`Payment error: ${errorData.error || 'Unknown error'}`);
-      return; 
-    }
-    
-    const { sessionId } = await res.json();
-    
-    // Update pay button to redirect
-    document.getElementById("payBtn").onclick = async ()=> {
+    // Initialize Stripe Elements
+    if (!window.stripe) {
       if (!window.STRIPE_PUBLIC_KEY) {
-        toast("Stripe is loading - please wait a moment and try again");
+        toast("Stripe is loading - please wait and try again");
         return;
       }
-      const stripe = Stripe(window.STRIPE_PUBLIC_KEY);
-      await stripe.redirectToCheckout({ sessionId });
-    };
+      window.stripe = Stripe(window.STRIPE_PUBLIC_KEY);
+    }
+    
+    if (!window.elements) {
+      window.elements = window.stripe.elements({ clientSecret });
+      const paymentElement = window.elements.create("payment");
+      paymentElement.mount("#payment-element");
+    }
+    
+    // Handle form submission
+    document.getElementById("payment-form").onsubmit = handleSubmit;
   };
+  
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await window.stripe.confirmPayment({
+      elements: window.elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/checkout.html?success=true`,
+      },
+    });
+
+    if (error) {
+      showMessage(error.message);
+      setLoading(false);
+    }
+  }
+
+  function showMessage(messageText) {
+    const messageContainer = document.querySelector("#payment-message");
+    messageContainer.classList.remove("hidden");
+    messageContainer.textContent = messageText;
+  }
+
+  function setLoading(isLoading) {
+    if (isLoading) {
+      document.querySelector("#submit").disabled = true;
+      document.querySelector("#button-text").textContent = "Processing…";
+    } else {
+      document.querySelector("#submit").disabled = false;
+      document.querySelector("#button-text").textContent = "Pay now";
+    }
+  }
 }
 
 // INFO / POLICY page: render the policy named in ?p=

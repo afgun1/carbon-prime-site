@@ -88,10 +88,14 @@
         <!-- 03 Payment (revealed after Continue) -->
         <div class="co-section" id="paymentSection" style="margin-top:20px;display:none">
           <h2><span class="step-n">03</span> Payment</h2>
-          <p class="sub">Pay securely by card.</p>
-          <div id="payment-element"></div>
-          <button class="btn btn-primary btn-block" id="payBtn" type="button" style="margin-top:18px">Pay <span id="payTotal"></span></button>
-          <p class="pay-note" id="payMessage"></p>
+          <p class="sub">Pay securely with card or Apple Pay.</p>
+          <form id="payment-form">
+            <div id="payment-element"></div>
+            <button id="submit" type="submit" class="btn btn-primary btn-block" style="margin-top:18px">
+              <span id="button-text">Pay <span id="payTotal">£0</span></span>
+            </button>
+            <div id="payment-message" class="hidden"></div>
+          </form>
         </div>
 
       </div>
