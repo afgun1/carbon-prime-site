@@ -540,6 +540,15 @@ function initCheckout(){
     const email = document.getElementById("gEmail").value.trim();
     if(!email){ toast("Email is required"); return; }
     
+    // Show payment section
+    const paymentSec = document.getElementById("paymentSection");
+    paymentSec.style.display = "block";
+    paymentSec.scrollIntoView({behavior:"smooth", block:"center"});
+    
+    // Update payment total
+    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    document.getElementById("payTotal").textContent = `£${total.toFixed(2)}`;
+    
     // Create checkout session
     const res = await fetch('/.netlify/functions/create-checkout', {
       method: 'POST',
@@ -554,16 +563,17 @@ function initCheckout(){
     
     const { sessionId } = await res.json();
     
-    // Redirect to Stripe Checkout
-    const stripe = Stripe(window.STRIPE_PUBLIC_KEY);
-    stripe.redirectToCheckout({ sessionId });
+    // Update pay button to redirect
+    document.getElementById("payBtn").onclick = async ()=> {
+      if (!window.STRIPE_PUBLIC_KEY) {
+        toast("Stripe is loading - please wait a moment and try again");
+        return;
+      }
+      const stripe = Stripe(window.STRIPE_PUBLIC_KEY);
+      await stripe.redirectToCheckout({ sessionId });
+    };
   };
   
-  // pay button
-  document.getElementById("payBtn").onclick = ()=> {
-    document.getElementById("toPayment").click();
-  };
-}
 
 // INFO / POLICY page: render the policy named in ?p=
 function initInfo(){
