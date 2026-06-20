@@ -5,8 +5,3 @@
   [env.production]
     STRIPE_SECRET_KEY = ""
     STRIPE_PUBLIC_KEY = ""
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200

@@ -267,7 +267,7 @@ function toast(msg, showBasket){
 // SHOP: render product cards, with category filter
 function cardHTML(p){
   const bgImg = p.cardImg ? `style="background-image:url('${p.cardImg}');background-size:cover;background-position:center"` : '';
-  const img = `<div class="card-img weave" ${bgImg}>${cardBadge(p)}<span class="ghost" ${p.cardImg ? 'style="display:none"' : ''}>${p.ghost}</span></div>`;
+  const img = `<div class="card-img weave" role="img" aria-label="${p.name} carbon fibre for BMW ${p.series} ${p.chassis}" ${bgImg}>${cardBadge(p)}<span class="ghost" ${p.cardImg ? 'style="display:none"' : ''}>${p.ghost}</span></div>`;
   const body = `<div class="card-body">
       <span class="card-pn">${p.cat} · ${p.chassis}</span>
       <h3>${p.name}</h3>
@@ -305,10 +305,58 @@ function shopSection(title, sub, cls, items){
 }
 
 // PRODUCT: read ?id, render detail + options + add to cart
+function setProductSEO(p){
+  const base = "https://carbonprime.netlify.app";
+  const url = `${base}/product.html?id=${p.id}`;
+  const img = p.cardImg ? `${base}/${p.cardImg}` : `${base}/images/f32-splitter1.jpg.webp`;
+  const title = `${p.name} for BMW ${p.series} ${p.chassis} | Carbon Fibre | Carbon Prime`;
+  const desc = `${p.blurb} Genuine carbon fibre for the BMW ${p.series} (${p.chassis}), hand-inspected and ceramic-protected before dispatch. Free UK delivery.`;
+  const avail = p.status === "available" ? "InStock" : (p.status === "soldout" ? "OutOfStock" : "PreOrder");
+
+  document.title = title;
+
+  const setMeta = (sel, attr, val) => {
+    let el = document.head.querySelector(sel);
+    if(!el){ el = document.createElement("meta"); const [a,v] = attr; el.setAttribute(a, v); document.head.appendChild(el); }
+    el.setAttribute("content", val);
+  };
+  setMeta('meta[name="description"]', ["name","description"], desc);
+  setMeta('meta[property="og:title"]', ["property","og:title"], title);
+  setMeta('meta[property="og:description"]', ["property","og:description"], desc);
+  setMeta('meta[property="og:image"]', ["property","og:image"], img);
+  setMeta('meta[property="og:url"]', ["property","og:url"], url);
+
+  let canon = document.head.querySelector('link[rel="canonical"]');
+  if(!canon){ canon = document.createElement("link"); canon.rel = "canonical"; document.head.appendChild(canon); }
+  canon.href = url;
+
+  // Product structured data for Google rich results
+  const schema = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": p.name,
+    "image": img,
+    "description": p.blurb,
+    "brand": { "@type": "Brand", "name": "Carbon Prime" },
+    "category": p.cat,
+    "offers": {
+      "@type": "Offer",
+      "url": url,
+      "priceCurrency": "GBP",
+      "price": p.price.toFixed(2),
+      "availability": `https://schema.org/${avail}`,
+      "seller": { "@type": "Organization", "name": "Carbon Prime" }
+    }
+  };
+  let sd = document.getElementById("productSchema");
+  if(!sd){ sd = document.createElement("script"); sd.type = "application/ld+json"; sd.id = "productSchema"; document.head.appendChild(sd); }
+  sd.textContent = JSON.stringify(schema);
+}
+
 function initProduct(){
   const id = new URLSearchParams(location.search).get("id") || PRODUCTS[0].id;
   const p = productById(id) || PRODUCTS[0];
-  document.title = `${p.name} - Carbon Prime`;
+  setProductSEO(p);
   const cn = document.getElementById("crumbName"); if (cn) cn.textContent = p.name;
 
   if(p.status && p.status!=="available"){
