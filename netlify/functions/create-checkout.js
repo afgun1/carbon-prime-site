@@ -23,13 +23,23 @@ exports.handler = async (event) => {
     }
 
     // Build line items for Stripe
-    const lineItems = items.map((item, i) => ({
-      [`line_items[${i}][price_data][currency]`]: 'gbp',
-      [`line_items[${i}][price_data][product_data][name]`]: item.name || 'Product',
-      [`line_items[${i}][price_data][product_data][description]`]: `${item.series || ''} ${item.chassis || ''}`.trim(),
-      [`line_items[${i}][price_data][unit_amount]`]: Math.round((item.price || 0) * 100),
-      [`line_items[${i}][quantity]`]: item.qty || 1,
-    })).reduce((acc, obj) => Object.assign(acc, obj), {});
+    let lineItemIndex = 0;
+    const lineItems = {};
+    
+    items.forEach(item => {
+      lineItems[`line_items[${lineItemIndex}][price_data][currency]`] = 'gbp';
+      lineItems[`line_items[${lineItemIndex}][price_data][product_data][name]`] = item.name || 'Carbon Part';
+      
+      // Only add description if we have series or chassis
+      const desc = `${item.series || ''} ${item.chassis || ''}`.trim();
+      if (desc) {
+        lineItems[`line_items[${lineItemIndex}][price_data][product_data][description]`] = desc;
+      }
+      
+      lineItems[`line_items[${lineItemIndex}][price_data][unit_amount]`] = Math.round((item.price || 0) * 100);
+      lineItems[`line_items[${lineItemIndex}][quantity]`] = item.qty || 1;
+      lineItemIndex++;
+    });
 
     // Build form data for Stripe API
     const params = new URLSearchParams();
