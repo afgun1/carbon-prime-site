@@ -26,7 +26,7 @@ exports.handler = async (event) => {
     params.append('amount', amount.toString());
     params.append('currency', 'gbp');
     params.append('automatic_payment_methods[enabled]', 'true');
-    params.append('customer_email', email);
+    params.append('receipt_email', email);
     params.append('description', description);
     params.append('metadata[cart_items]', items.length.toString());
 
