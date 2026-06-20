@@ -72,8 +72,19 @@
 
         <!-- 02 Delivery -->
         <div class="co-section">
-          <h2><span class="step-n">02</span> Delivery</h2>
+          <h2><span class="step-n">02</span> Delivery & Coupon</h2>
           <p class="sub">Where should we send it?</p>
+          
+          <!-- Coupon Code Input -->
+          <div style="background:var(--raised);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:24px">
+            <label style="display:block;font-size:13px;color:var(--dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Have a coupon code?</label>
+            <div style="display:flex;gap:10px">
+              <input type="text" id="couponInput" placeholder="e.g. CARBON10" style="flex:1;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:14px;color:var(--text);font-family:JetBrains Mono,monospace;text-transform:uppercase">
+              <button type="button" id="applyCoupon" class="btn btn-primary" style="padding:10px 20px;font-size:13px">Apply</button>
+            </div>
+            <div id="couponStatus" style="margin-top:10px;font-size:12px;display:none;padding:8px 12px;border-radius:6px"></div>
+          </div>
+          
           <div class="field"><label>Address line 1</label><input type="text" placeholder="House number and street"></div>
           <div class="field"><label>Address line 2 (optional)</label><input type="text" placeholder="Flat, unit, etc."></div>
           <div class="field-row">

@@ -535,6 +535,63 @@ function initCheckout(){
   const sc = document.getElementById("coSignin");
   if(sc) sc.onclick = ()=> toast("Accounts aren't live yet - use guest checkout for now");
 
+  // COUPON CODE HANDLING
+  let appliedCoupon = null;
+  const validCoupons = { "CARBON10": 0.10 }; // 10% discount
+  
+  document.getElementById("applyCoupon").onclick = ()=>{
+    const code = document.getElementById("couponInput").value.trim().toUpperCase();
+    const statusDiv = document.getElementById("couponStatus");
+    
+    if(!code){
+      statusDiv.textContent = "Enter a coupon code";
+      statusDiv.style.background = "var(--raised)";
+      statusDiv.style.color = "var(--dim)";
+      statusDiv.style.display = "block";
+      return;
+    }
+    
+    if(validCoupons[code]){
+      appliedCoupon = code;
+      const discount = validCoupons[code];
+      statusDiv.innerHTML = `✓ Coupon applied: ${Math.round(discount*100)}% off`;
+      statusDiv.style.background = "rgba(209, 31, 45, 0.1)";
+      statusDiv.style.color = "var(--red)";
+      statusDiv.style.display = "block";
+      document.getElementById("couponInput").disabled = true;
+      document.getElementById("applyCoupon").disabled = true;
+      updateOrderSummary(appliedCoupon);
+    } else {
+      statusDiv.textContent = "Code not found";
+      statusDiv.style.background = "var(--raised)";
+      statusDiv.style.color = "var(--red)";
+      statusDiv.style.display = "block";
+    }
+  };
+  
+  function updateOrderSummary(couponCode){
+    const cart = getCart();
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const discount = couponCode ? subtotal * validCoupons[couponCode] : 0;
+    const total = subtotal - discount;
+    
+    // Update summary display
+    const subtotalEl = document.querySelector("[data-summary='subtotal']");
+    const discountEl = document.querySelector("[data-summary='discount']");
+    const totalEl = document.querySelector("[data-summary='total']");
+    
+    if(subtotalEl) subtotalEl.textContent = `£${subtotal.toFixed(2)}`;
+    if(discountEl){
+      if(discount > 0){
+        discountEl.parentElement.style.display = "flex";
+        discountEl.textContent = `-£${discount.toFixed(2)}`;
+      } else {
+        discountEl.parentElement.style.display = "none";
+      }
+    }
+    if(totalEl) totalEl.textContent = `£${total.toFixed(2)}`;
+  }
+
   // continue to payment (validates guest name+email)
   document.getElementById("toPayment").onclick = async ()=>{
     const guestActive = document.querySelector("#coTabs .auth-tab.active").dataset.co==="guest";
@@ -558,15 +615,19 @@ function initCheckout(){
     const email = document.getElementById("gEmail").value.trim();
     if(!email){ toast("Email is required"); return; }
     
-    // Calculate total
-    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    // Calculate total with coupon
+    let total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    if(appliedCoupon && validCoupons[appliedCoupon]){
+      const discountAmount = total * validCoupons[appliedCoupon];
+      total = total - discountAmount;
+    }
     document.getElementById("payTotal").textContent = `£${total.toFixed(2)}`;
     
     // Create payment intent on server
     const res = await fetch('/.netlify/functions/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: cart, email, amount: Math.round(total * 100) }),
+      body: JSON.stringify({ items: cart, email, amount: Math.round(total * 100), coupon: appliedCoupon }),
     });
     
     if(!res.ok){ 
@@ -716,3 +777,60 @@ document.addEventListener("DOMContentLoaded", ()=>{
   if (page==="contact")  initContact();
   if (["shop","product","cart","account","checkout","info","contact"].includes(page)) initReveal();
 });
+
+/* PROMO POPUP - 10% off first order --------------------------------- */
+function initPromoPopup(){
+  const popup = document.getElementById("promoPopup");
+  const closeBtn = document.getElementById("promoClose");
+  const form = document.getElementById("promoForm");
+  const email = document.getElementById("promoEmail");
+  const message = document.getElementById("promoMessage");
+  const couponDiv = document.getElementById("couponCode");
+  
+  // Show popup after 2 seconds (only if not dismissed before)
+  const dismissed = localStorage.getItem("promoPopupDismissed");
+  if(!dismissed){
+    setTimeout(()=>{ popup.classList.add("show"); }, 2000);
+  }
+  
+  // Close button
+  closeBtn.onclick = ()=>{ 
+    popup.classList.remove("show");
+    localStorage.setItem("promoPopupDismissed", "true");
+  };
+  
+  // Form submission
+  form.onsubmit = async (e)=>{
+    e.preventDefault();
+    const emailVal = email.value.trim();
+    if(!emailVal) return;
+    
+    // Generate coupon code (CARBON10)
+    const code = "CARBON10";
+    
+    // Send email to list (optional - can add Mailchimp later)
+    try {
+      await fetch('/.netlify/functions/add-promo-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailVal }),
+      });
+    } catch(e) { console.log('Email saved locally'); }
+    
+    // Show coupon
+    form.style.display = "none";
+    message.style.display = "block";
+    couponDiv.textContent = code;
+    
+    // Dismiss after 10 seconds
+    setTimeout(()=>{ 
+      popup.classList.remove("show");
+      localStorage.setItem("promoPopupDismissed", "true");
+    }, 10000);
+  };
+}
+
+// Run on home page
+if(document.body.dataset.page === "home"){
+  document.addEventListener("DOMContentLoaded", initPromoPopup);
+}

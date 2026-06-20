@@ -13,6 +13,25 @@
 <body data-page="home">
 <div id="site-header"></div>
 
+<!-- Promo Popup -->
+<div id="promoPopup" class="promo-popup">
+  <div class="promo-popup-content">
+    <button class="promo-close" id="promoClose">&times;</button>
+    <div class="promo-inner">
+      <h2>10% off your first order</h2>
+      <p>Join our Founders list and get an instant discount code.</p>
+      <form id="promoForm" class="promo-form">
+        <input type="email" id="promoEmail" placeholder="Enter your email" required>
+        <button type="submit" class="btn btn-primary">Get your code</button>
+      </form>
+      <div id="promoMessage" style="display:none;margin-top:15px;text-align:center">
+        <p style="color:var(--chrome);font-weight:600;margin-bottom:8px">Your coupon code:</p>
+        <div id="couponCode" style="background:var(--raised);padding:12px 16px;border-radius:6px;font-family:JetBrains Mono;font-size:16px;letter-spacing:2px;font-weight:700"></div>
+        <p style="font-size:12px;color:var(--dim);margin-top:10px">Copy and use at checkout</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <section class="hero" id="top">
   <div class="hero-glow"></div>

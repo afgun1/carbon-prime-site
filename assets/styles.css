@@ -372,3 +372,17 @@
   .card-notify:hover{border-color:var(--chrome-2);color:var(--text)}
   .status-note{border:1px solid var(--line);border-left:2px solid var(--red);border-radius:6px;background:var(--raised);padding:14px 16px;font-size:14px;color:var(--text)}
   .status-note.coming{border-left-color:var(--chrome-2)}
+
+/* PROMO POPUP --------------------------------------------------------- */
+.promo-popup{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:.3s var(--ease);backdrop-filter:blur(2px)}
+.promo-popup.show{opacity:1;pointer-events:auto}
+.promo-popup-content{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:40px;max-width:420px;width:90%;box-shadow:0 20px 60px -20px rgba(0,0,0,.7);position:relative;animation:slideUp .4s var(--ease)}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.promo-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--dim);cursor:pointer;font-size:28px;padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;transition:.2s var(--ease)}
+.promo-close:hover{color:var(--text)}
+.promo-inner h2{font-family:"Archivo Expanded",sans-serif;font-size:24px;font-weight:600;margin-bottom:10px;color:var(--text)}
+.promo-inner p{font-size:14px;color:var(--dim);margin-bottom:24px}
+.promo-form{display:flex;flex-direction:column;gap:12px}
+.promo-form input{background:var(--raised);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-size:14px;color:var(--text);font-family:Inter,sans-serif;transition:.2s var(--ease)}
+.promo-form input:focus{outline:none;border-color:var(--chrome);background:var(--raised)}
+.promo-form button{padding:12px 16px;font-size:13px;font-weight:600}
