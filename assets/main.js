@@ -162,10 +162,6 @@ const NAV = active => `
     <a href="index.html#coating" data-nav="coating">Coating</a>
   </nav>
   <div class="nav-right">
-    <a class="icon-link" href="account.html" data-nav="account" aria-label="Account">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-      <span class="acc-label">Account</span>
-    </a>
     <a class="icon-link cart-link" href="cart.html" aria-label="Cart">
       <svg viewBox="0 0 24 24"><path d="M3 4h2l2.2 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H7"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></svg>
       <span class="cart-count" data-empty="1">0</span>
@@ -197,7 +193,7 @@ const FOOTER = `
       <div class="foot-col"><h5>Shop</h5>
         <a href="shop.html">Exterior</a><a href="shop.html">Aero</a><a href="shop.html">Interior</a><a href="index.html#coating">Ceramic Coating</a></div>
       <div class="foot-col"><h5>Orders &amp; Account</h5>
-        <a href="account.html">Sign in</a><a href="account.html">Create account</a><a href="cart.html">Basket</a><a href="info.html?p=returns">Returns &amp; exchanges</a><a href="contact.html">Contact us</a></div>
+      <a href="cart.html">Basket</a><a href="info.html?p=returns">Returns &amp; exchanges</a><a href="contact.html">Contact us</a></div>
       <div class="foot-col"><h5>Help &amp; Policies</h5>
         <a href="info.html?p=fitment">Fitment &amp; guarantee</a><a href="info.html?p=shipping">Shipping</a><a href="info.html?p=returns">Returns policy</a><a href="info.html?p=warranty">Warranty</a><a href="info.html?p=terms">Terms</a><a href="info.html?p=privacy">Privacy</a></div>
     </div>
