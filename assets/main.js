@@ -247,9 +247,14 @@ function initReveal(){
 function toast(msg){
   let t = document.querySelector(".toast");
   if(!t){ t = document.createElement("div"); t.className="toast"; document.body.appendChild(t); }
-  t.innerHTML = `<span class="dot"></span><span>${msg}</span><a href="cart.html">View basket</a>`;
+  t.innerHTML = `<span class="dot"></span><span>${msg}</span><a href="cart.html" style="cursor:pointer">View basket</a><button type="button" style="background:none;border:none;color:inherit;cursor:pointer;font-size:18px;padding:0 10px">×</button>`;
   requestAnimationFrame(()=>t.classList.add("show"));
-  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), 3200);
+  
+  // Close button
+  t.querySelector("button").onclick = (e)=>{ e.preventDefault(); t.classList.remove("show"); };
+  
+  // Keep visible longer (5 seconds instead of 3.2)
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), 5000);
 }
 
 /* ---------- 4. PAGE BUILDERS ---------- */
