@@ -1,5 +1,3 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
@@ -16,62 +14,65 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Email is required' }) };
     }
 
-    // Convert cart items to Stripe line items
-    const lineItems = items.map(item => {
-      const priceInPence = Math.round((item.price || 0) * 100);
-      if (priceInPence <= 0) {
-        throw new Error(`Invalid price for ${item.name}: ${item.price}`);
-      }
+    // Build line items for Stripe
+    const lineItems = items.map((item, i) => ({
+      [`line_items[${i}][price_data][currency]`]: 'gbp',
+      [`line_items[${i}][price_data][product_data][name]`]: item.name || 'Product',
+      [`line_items[${i}][price_data][product_data][description]`]: `${item.series || ''} ${item.chassis || ''}`.trim(),
+      [`line_items[${i}][price_data][unit_amount]`]: Math.round((item.price || 0) * 100),
+      [`line_items[${i}][quantity]`]: item.qty || 1,
+    })).reduce((acc, obj) => Object.assign(acc, obj), {});
 
-      return {
-        price_data: {
-          currency: 'gbp',
-          product_data: {
-            name: item.name || 'Product',
-            description: `${item.series || ''} · ${item.chassis || ''}`.trim(),
-          },
-          unit_amount: priceInPence,
-        },
-        quantity: item.qty || 1,
-      };
+    // Build form data for Stripe API
+    const params = new URLSearchParams();
+    params.append('payment_method_types[]', 'card');
+    params.append('mode', 'payment');
+    params.append('customer_email', email);
+    params.append('success_url', `${process.env.URL}/checkout.html?success=true`);
+    params.append('cancel_url', `${process.env.URL}/checkout.html?canceled=true`);
+    params.append('billing_address_collection', 'required');
+    params.append('shipping_address_collection[allowed_countries][]', 'GB');
+    params.append('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');
+    params.append('shipping_options[0][shipping_rate_data][fixed_amount][amount]', '0');
+    params.append('shipping_options[0][shipping_rate_data][fixed_amount][currency]', 'gbp');
+    params.append('shipping_options[0][shipping_rate_data][display_name]', 'Free delivery');
+    params.append('shipping_options[0][shipping_rate_data][delivery_estimate][minimum][unit]', 'business_day');
+    params.append('shipping_options[0][shipping_rate_data][delivery_estimate][minimum][value]', '3');
+    params.append('shipping_options[0][shipping_rate_data][delivery_estimate][maximum][unit]', 'business_day');
+    params.append('shipping_options[0][shipping_rate_data][delivery_estimate][maximum][value]', '5');
+
+    // Add line items
+    Object.entries(lineItems).forEach(([key, value]) => {
+      params.append(key, value);
     });
 
-    // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: lineItems,
-      mode: 'payment',
-      customer_email: email,
-      success_url: `${process.env.URL}/checkout.html?success=true`,
-      cancel_url: `${process.env.URL}/checkout.html?canceled=true`,
-      billing_address_collection: 'required',
-      shipping_address_collection: {
-        allowed_countries: ['GB'],
+    // Call Stripe API
+    const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: {
-              amount: 0,
-              currency: 'gbp',
-            },
-            display_name: 'Free delivery',
-            delivery_estimate: {
-              minimum: { unit: 'business_day', value: 3 },
-              maximum: { unit: 'business_day', value: 5 },
-            },
-          },
-        },
-      ],
+      body: params.toString(),
     });
+
+    if (!stripeResponse.ok) {
+      const error = await stripeResponse.text();
+      console.error('Stripe API error:', error);
+      return {
+        statusCode: stripeResponse.status,
+        body: JSON.stringify({ error: `Stripe error: ${error}` }),
+      };
+    }
+
+    const session = await stripeResponse.json();
 
     return {
       statusCode: 200,
       body: JSON.stringify({ sessionId: session.id }),
     };
   } catch (error) {
-    console.error('Stripe error:', error.message);
+    console.error('Checkout error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message || 'Payment session creation failed' }),
