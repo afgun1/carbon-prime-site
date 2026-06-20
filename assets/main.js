@@ -62,9 +62,9 @@ RANGES.forEach(r => PARTS.forEach(pt => {
 
 /* coating choices shared by every product (price delta in £) */
 const COATINGS = [
-  { id:"standard", label:"Standard - included", note:"Ceramic coated before dispatch", delta:0 },
-  { id:"upgrade",  label:"Coating upgrade",     note:"Heavier, longer-life layer",    delta:35 },
-  { id:"diy",      label:"DIY 5ml kit",         note:"Apply it yourself, with our guide", delta:-10 },
+  { id:"standard", label:"Standard - included", note:"Ceramic coated before dispatch", delta:0, available:true },
+  { id:"upgrade",  label:"Coating upgrade service", note:"Professional ceramic coating +£30", delta:30, available:false, comingSoon:true },
+  { id:"diy",      label:"DIY ceramic coating kit", note:"5ml kit to apply yourself +£10", delta:10, available:false, comingSoon:true },
 ];
 
 /* ---------- INFO / POLICY CONTENT ----------
@@ -353,9 +353,13 @@ function initProduct(){
         <span class="opt-label">Ceramic coating</span>
         <div class="opt-radios" id="coatRadios">
           ${COATINGS.map((c,i)=>`
-            <label class="opt-radio ${i===0?'sel':''}">
-              <input type="radio" name="coat" value="${c.id}" ${i===0?'checked':''}>
-              <span class="t">${c.label}<small>${c.note}</small></span>
+            <label class="opt-radio ${i===0?'sel':''} ${!c.available?'disabled':''}" ${!c.available?'style="opacity:0.6;cursor:not-allowed"':''}>
+              <input type="radio" name="coat" value="${c.id}" ${i===0?'checked':''} ${!c.available?'disabled':''}>
+              <span class="t">
+                ${c.label}
+                ${c.comingSoon ? '<span style="color:var(--chrome);font-size:11px;margin-left:6px;text-transform:uppercase;letter-spacing:.05em">Coming soon</span>' : ''}
+                <small>${c.note}</small>
+              </span>
               <span class="pr">${c.delta===0?'Included':(c.delta>0?'+'+money(c.delta):'−'+money(-c.delta))}</span>
             </label>`).join("")}
         </div>
@@ -391,7 +395,13 @@ function initProduct(){
   const refresh = () => priceEl.textContent = money(priceNow());
 
   document.querySelectorAll('input[name="coat"]').forEach(r=>{
-    r.addEventListener("change", ()=>{
+    r.addEventListener("change", (e)=>{
+      const coatingObj = COATINGS.find(c => c.id === r.value);
+      if(coatingObj && !coatingObj.available){
+        e.preventDefault();
+        toast("This option is coming soon");
+        return;
+      }
       coating = r.value;
       document.querySelectorAll(".opt-radio").forEach(l=>l.classList.toggle("sel", l.contains(r)));
       refresh();
