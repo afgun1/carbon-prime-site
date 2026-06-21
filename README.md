@@ -118,6 +118,8 @@ These call the Stripe REST API directly (no npm dependency).
   real payments). **Tick "Secret value".**
 - `STRIPE_PUBLIC_KEY` - publishable key (`pk_test_…` / `pk_live_…`).
 - `URL` - provided automatically by Netlify (used for success/cancel redirects).
+- `EMAILOCTOPUS_API_KEY` - EmailOctopus API key (**tick "Secret value"**).
+- `EMAILOCTOPUS_LIST_ID` - the ID of the "Members" list signups go into.
 
 ---
 
@@ -159,9 +161,7 @@ pages, plus `robots.txt` and `sitemap.xml`, to the new domain.
 
 ## 10. Known pending items
 
-- Connect promo emails to Mailchimp (currently only logged).
-- Branded order-confirmation email (Stripe sends a basic receipt).
-- Real phone number in footer (placeholder).
+- Branded order-confirmation email (Stripe sends a receipt; see note below).
 - Policy copy (Terms / Privacy) flagged as templates - review before launch.
 - Accounts/login backend (Phase 2 - guest checkout for now).
 - F30 uses F32 images as placeholders until real photos exist.
@@ -171,6 +171,13 @@ pages, plus `robots.txt` and `sitemap.xml`, to the new domain.
 
 ## 11. Changelog
 
+- **2026-06-21** - Removed placeholder phone number, YouTube and Discord
+  icons from footer (Instagram + TikTok remain). Full project audit: all JS
+  valid, HTML SEO tags consistent, CSS balanced, no stale account refs.
+- **2026-06-21** - Wired popup signups to EmailOctopus (v2 API, Bearer auth,
+  PUT upsert endpoint) via `add-promo-email.js`; requires
+  `EMAILOCTOPUS_API_KEY` and `EMAILOCTOPUS_LIST_ID` env vars in Netlify.
+  Stripe branded receipts enabled in dashboard (customer order confirmation).
 - **2026-06-20** - SEO pass (per-page meta, OG, product schema, robots.txt,
   sitemap.xml); removed catch-all redirect; hid account links from nav and
   footer; added full documentation to this README.
