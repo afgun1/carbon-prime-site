@@ -1,0 +1,7 @@
+[build]
+  functions = "netlify/functions"
+
+[env]
+  [env.production]
+    STRIPE_SECRET_KEY = ""
+    STRIPE_PUBLIC_KEY = ""

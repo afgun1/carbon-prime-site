@@ -1,0 +1,17 @@
+# dependencies (only if you add a serverless function later)
+node_modules/
+
+# secrets — NEVER commit these
+.env
+.env.*
+*.local
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+
+# build output (if you add a build step later)
+dist/
+.netlify/
+.vercel/

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Checkout | Carbon Prime</title>
+<meta name="description" content="Carbon Prime checkout." />
+<link rel="canonical" href="https://carbonprime.netlify.app/checkout.html" />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  // Load Stripe public key from function
+  fetch('/.netlify/functions/get-stripe-key')
+    .then(r => r.json())
+    .then(d => { window.STRIPE_PUBLIC_KEY = d.publicKey; })
+    .catch(e => console.error('Failed to load Stripe key', e));
+</script>
+</head>
+<body data-page="checkout">
+<div id="site-header"></div>
+<main class="page">
+  <div class="pagehead"><div class="wrap">
+    <div class="crumbs"><a href="index.html">Home</a><span class="sep">/</span><a href="cart.html">Basket</a><span class="sep">/</span><span>Checkout</span></div>
+    <h1>Checkout</h1>
+  </div></div>
+
+  <div class="wrap">
+    <div id="coSuccess" style="display:none;text-align:center;padding:60px 20px">
+      <h2 style="color:var(--chrome);margin-bottom:10px;font-size:32px">✓ Order confirmed</h2>
+      <p style="color:var(--dim);margin-bottom:30px;font-size:16px">Your payment went through and we're preparing your order.</p>
+      
+      <div style="background:var(--raised);padding:30px;border-radius:8px;margin-bottom:30px;max-width:500px;margin-left:auto;margin-right:auto">
+        <p style="font-size:14px;color:var(--dim);margin-bottom:15px">What happens next:</p>
+        <div style="text-align:left">
+          <p style="margin:10px 0"><strong>1. Confirmation email</strong><br><span style="color:var(--dim);font-size:14px">Check your inbox for order details and tracking info</span></p>
+          <p style="margin:10px 0"><strong>2. We inspect & pack</strong><br><span style="color:var(--dim);font-size:14px">Every part is hand-checked before we box it up</span></p>
+          <p style="margin:10px 0"><strong>3. It ships to you</strong><br><span style="color:var(--dim);font-size:14px">Tracked delivery within 3-5 business days</span></p>
+          <p style="margin:10px 0"><strong>4. Install & share</strong><br><span style="color:var(--dim);font-size:14px">Tag us @carbonprime_uk on Instagram with your setup</span></p>
+        </div>
+      </div>
+      
+      <p style="color:var(--dim);margin-bottom:20px;font-size:14px">Questions? Email <a href="mailto:carbon.prime@outlook.com" style="color:var(--chrome)">carbon.prime@outlook.com</a></p>
+      
+      <a class="btn btn-primary" href="shop.html">Browse more parts</a>
+    </div>
+    <div class="checkout-wrap" id="coForm">
+      <div class="co-left">
+
+        <!-- 01 Contact: guest or sign in -->
+        <div class="co-section">
+          <h2><span class="step-n">01</span> Contact</h2>
+          <p class="sub">Enter your details to continue.</p>
+          <div id="guestPane">
+            <div class="field-row">
+              <div class="field"><label>Name</label><input id="gName" type="text" placeholder="Your name"></div>
+              <div class="field"><label>Email</label><input id="gEmail" type="email" placeholder="you@email.com"></div>
+            </div>
+            <p style="color:var(--faint);font-size:12px">We'll email your order confirmation and tracking here.</p>
+          </div>
+        </div>
+
+        <!-- 02 Delivery -->
+        <div class="co-section">
+          <h2><span class="step-n">02</span> Delivery & Coupon</h2>
+          <p class="sub">Where should we send it?</p>
+          
+          <!-- Coupon Code Input -->
+          <div style="background:var(--raised);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:24px">
+            <label style="display:block;font-size:13px;color:var(--dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Have a coupon code?</label>
+            <div style="display:flex;gap:10px">
+              <input type="text" id="couponInput" placeholder="e.g. CARBON10" style="flex:1;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:14px;color:var(--text);font-family:JetBrains Mono,monospace;text-transform:uppercase">
+              <button type="button" id="applyCoupon" class="btn btn-primary" style="padding:10px 20px;font-size:13px">Apply</button>
+            </div>
+            <div id="couponStatus" style="margin-top:10px;font-size:12px;display:none;padding:8px 12px;border-radius:6px"></div>
+          </div>
+          
+          <div class="field"><label>Address line 1</label><input type="text" id="addressField" placeholder="House number and street"></div>
+          <div class="field"><label>Address line 2 (optional)</label><input type="text" placeholder="Flat, unit, etc."></div>
+          <div class="field-row">
+            <div class="field"><label>Town / City</label><input type="text" id="cityField"></div>
+            <div class="field"><label id="postcodeLabel">Postcode</label><input type="text" id="postcodeField"></div>
+          </div>
+          <div class="field"><label>Country</label><input type="text" id="countryField" value="United Kingdom"></div>
+        </div>
+        
+        <script>
+          // Update postcode label based on country
+          const countryField = document.getElementById("countryField");
+          const postcodeLabel = document.getElementById("postcodeLabel");
+          countryField.addEventListener("change", ()=>{
+            postcodeLabel.textContent = countryField.value === "United Kingdom" ? "Postcode" : "Postcode / ZIP Code";
+          });
+        </script>
+
+        <button class="btn btn-primary btn-block" id="toPayment" type="button">Continue to payment</button>
+
+        <!-- 03 Payment (revealed after Continue) -->
+        <div class="co-section" id="paymentSection" style="margin-top:20px;display:none">
+          <h2><span class="step-n">03</span> Payment</h2>
+          <p class="sub">Pay securely with card or Apple Pay.</p>
+          <form id="payment-form">
+            <div id="payment-element"></div>
+            <button id="submit" type="submit" class="btn btn-primary btn-block" style="margin-top:18px">
+              <span id="button-text">Pay <span id="payTotal">£0</span></span>
+            </button>
+            <div id="payment-message" class="hidden"></div>
+          </form>
+        </div>
+
+      </div>
+
+      <aside class="summary" id="coSummary"></aside>
+    </div>
+
+    <div id="coEmpty" style="display:none"></div>
+  </div>
+</main>
+<div id="site-footer"></div>
+<script src="assets/main.js"></script>
+</body>
+</html>
